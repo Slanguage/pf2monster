@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Pathfinder 2e Monster Creator</title>
+		
+		<link href="https://fonts.googleapis.com/css?family=Roboto:regular,bold" rel="stylesheet">
+		<style>
+			body {
+				font-family: "Roboto", Geneva, sans-serif;
+				font-size: 16px;
+				line-height: 24px;
+				-webkit-font-smoothing: antialiased;
+			}
+			#config {
+				float: left;
+				width: 400px;
+				display: flex;
+				flex-wrap: wrap;
+				border: 1px solid black;
+				margin: 20px;
+				padding: 0px;
+			}
+			#statblock {
+				float: left;
+				width: 500px;
+				border: 1px solid black;
+				margin: 20px;
+				padding: 20px;
+			}
+			#title {
+				font-size: 23px;
+				font-weight: bold;
+				width: 100%;
+				text-transform: uppercase;
+			}
+			#name {
+				float: left;
+			}
+			#creature {
+				float: right;
+				text-align: right;
+			}
+			#tags {
+				height: 26px;
+				/*background-color: BurlyWood;*/
+				width: fit-content; 
+			}
+			#info-other {
+				clear: both;
+			}
+			.configTableCell,.configTableLabel,.configTableHeader,.configTableTEML {
+				box-sizing: border-box;
+				flex-grow: 1;
+				overflow: hidden;
+				list-style: none;
+			}
+			.configTableLabel,.configTableHeader {
+				width: 30%;
+				padding-left: 5px;
+			}
+			.configTableCell,.configTableTEML {
+				width: 70%;
+			}
+			.configTableHeader,.configTableTEML {
+				display: none;
+			}
+			.configText,.configSelect {
+				width: 100%;
+				font-size: 13px;
+				height: 30px;
+				line-height: 17px;
+				display: block;
+			}
+			.info-block {
+				clear: both;
+				border-top: 2px solid black;
+				padding-top: 5px;
+			}
+			.info-line {
+				padding-left: 18px;
+				text-indent: -18px;
+			}
+			.line-heavy {
+				font-weight: bold;
+			}
+			.tag-alignment,.tag-size,.tag-other,.tag-rarity-uncommon,.tag-rarity-rare,.tag-rarity-unique{
+				float: left;
+				height: 22px;
+				margin: 2px;
+				line-height: 22px;
+				font-family: Geneva, sans-serif;
+				font-size: 14px;
+				font-weight: bold;
+				color: white;
+				text-transform: uppercase;
+			}
+			.tag-rarity-uncommon,.tag-rarity-rare,.tag-rarity-unique {
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+			.tag-rarity-uncommon {
+				background-color: Sienna;
+			}
+			.tag-rarity-rare {
+				background-color: DarkBlue;
+			}
+			.tag-rarity-unique {
+				background-color: Indigo;
+			}
+			.tag-alignment {
+				background-color: SteelBlue;
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+			.tag-size {
+				background-color: SeaGreen;
+				padding-left: 10px;
+				padding-right: 10px;
+			}
+			.tag-other {
+				background-color: DarkRed;
+				padding-left: 20px;
+				padding-right: 20px;
+			}
+			.action-icon {
+				height: 16px;
+			}
+		</style>
+		<script>
+			var actionIcon   = "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAGxSURBVHja7JttqwFRFIWXe+8fJkkmiSSSJIWQIv/T/XJWae5lZsyZmbP3PquefEB5VvPmvAA502q1/pB+/91nX3x/5gg/vgsAMATwcAytFZA8yZPESgGDf+TJQHsB/TfypK+yAAC9HPKkp62AbgF50tVSQOcDedKRXkC7hDxpSy0g8SAfzi2yYAFbj/JkK6WATQXyZBN6AesK5ck61AJWNciTVTAFuNdljfJkGcoRsGhAniyaLmDeoDyZN3I6uIGMRyDM6i5gGpA8mdblPwlQnkyqPuzHAcuTcVUFjATIk5FP9x8Ae0HyZO9+e2n5u0B5ci9TwjeAm2B5cnMuhfIF4KpAnlydU77rHYCLInlycW6ZOSuUJ+cs+aNieXJ8JX8wIE8OafmdIXmyo/zJoDw5xQLiKRAvgvE2GB+E4qNw/DMU/w7HAZE4JJYds4Oiz7E7LG5+YiQV01NjjN3J0afYnB5PxcYCiYzoXyKTI7oXSeWM3mVyBaJzoWTB6Fsq+0F0LZb+MHqWy5eIjg0TJSN/y4yHyN405Slyt815jMyNkzXcIhMYi6zN0xUOqjS6ff53AA+L/8NN984kAAAAAElFTkSuQmCC";
+			var action2Icon  = "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";
+			var reactionIcon = "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";
+			
+			//                        -1   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
+			var arrAbilityScore1   = [ 3,  3,  3,  4,  4,  4,  5,  5,  5,  6,  6,  6,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10, 10, 10, 11, 11, 11];
+			var arrAbilityScore2   = [ 2,  2,  2,  3,  3,  3,  4,  4,  4,  4,  5,  5,  5,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10];
+			var arrAbilityScore3   = [ 1,  1,  1,  1,  2,  2,  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5,  5,  5,  6,  6,  6,  6,  7,  7,  7];
+			var arrAbilityScore4   = [ 0,  0,  1,  1,  1,  1,  2,  2,  2,  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,  5,  6,  6,  6];
+			var arrAbilityScore5   = [-1, -1, -1,  0,  0,  0,  0,  1,  1,  1,  1,  1,  2,  2,  2,  2,  3,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5];
+			var arrAbilityScore6   = [-2, -2, -2, -2, -1, -1, -1, -1,  0,  0,  0,  0,  0,  1,  1,  1,  1,  2,  2,  2,  2,  2,  3,  3,  3,  3,  5];
+
+			//                       -1  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+			var arrSkillsTEML      = [2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8, 8];
+			var arrSaveTEML1       = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8, 8];
+			var arrSaveTEML2       = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
+			var arrSaveTEML3       = [2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6];
+			var arrACTEML          = [2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8];
+			var arrAttackTEML      = [2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8];
+			var arrDCTEML          = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
+			var arrSpellDCTEML     = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
+
+			//                       -1    0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25
+			var arrHP              = [8,  15,  20,  30,  45,  60,  75,  95, 115, 135, 155, 175, 195, 215, 235, 255, 275, 295, 315, 335, 355, 375, 405, 435, 465, 495, 525];
+			var arrDamage          = [5,   6,   8,   9,  11,  13,  14,  16,  18,  19,  21,  23,  24,  26,  27,  29,  31,  32,  34,  36,  37,  39,  41,  42,  44,  46,  47];
+			var arrDamageDice      = [1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   3,   3,   3,   3,   3,   4,   4,   4,   4,   4,   5,   5,   5,   5,   5,   6,   6];
+
+			var myName             = "";
+			var myLevel            = 1;
+			var myIndex            = myLevel + 1;
+			var myProficiency      = 1;
+			var myAlignment        = "N";
+			var mySize             = "Medium";
+			var myTags             = [];
+			var myStr              = 0;
+			var myDex              = 0;
+			var myCon              = 0;
+			var myInt              = 0;
+			var myWis              = 0;
+			var myCha              = 0;
+			var myPerceptionTEML   = 0;
+			var myAcrobaticsTEML   = 0;
+			var myArcanaTEML       = 0;
+			var myAthleticsTEML    = 0;
+			var myCraftingTEML     = 0;
+			var myDeceptionTEML    = 0;
+			var myDiplomacyTEML    = 0;
+			var myIntimidationTEML = 0;
+			var myLoreTEML         = 0;
+			var myMedicineTEML     = 0;
+			var myNatureTEML       = 0;
+			var myOccultismTEML    = 0;
+			var myPerformanceTEML  = 0;
+			var myReligionTEML     = 0;
+			var mySocietyTEML      = 0;
+			var myStealthTEML      = 0;
+			var mySurvivalTEML     = 0;
+			var myThieveryTEML     = 0;
+			var myACTEML           = 0;
+			var myACItemBonus      = 0;
+			var myFortTEML         = 0;
+			var myRefTEML          = 0;
+			var myWillTEML         = 0;
+			var myHP               = 0;
+			var myAttackTEML       = 0;
+			var myDamage           = 0;
+
+			function getTEML(arrRadios) {
+				var myTEML = 0;
+				for (var i=0; i<arrRadios.length; i++) {
+					if (arrRadios[i].checked) {
+						myTEML = parseInt(arrRadios[i].value);
+						break;
+					}
+				}
+				return myTEML;
+			}
+
+			function setTEML(arrRadios, intTEML) {
+				for (var i=0; i<arrRadios.length; i++) {
+					if (arrRadios[i].value == intTEML) {
+						arrRadios[i].checked = true;
+					}
+				}
+			}
+
+
+			function getRadio(arrRadios) {
+				var strReturn = 0;
+				for (var i=0; i<arrRadios.length; i++) {
+					if (arrRadios[i].checked) {
+						strReturn = arrRadios[i].value;
+						break;
+					}
+				}
+				return strReturn;
+			}
+
+			function recalc() {
+				recalcBuild();
+				recalcName();
+				recalcTags();
+				recalcLevel(); //will also recalc perception, ac, saves, hp, ability scores, attacks, and skills
+				recalcSenses();
+				recalcSpeed();
+			}
+
+			function recalcBuild() {
+				var tmpRadios = document.getElementsByName("radioBuild");
+				myBuild = getRadio(tmpRadios);
+				
+				if(myBuild == "None") {
+					arrTEMLRadioButtons = document.getElementsByClassName("radioTEML");
+					for (var i=0; i<arrTEMLRadioButtons.length; i++) {
+						arrTEMLRadioButtons[i].disabled = false;
+					}
+				}
+				else {
+					arrTEMLRadioButtons = document.getElementsByClassName("radioTEML");
+					setTEML(arrTEMLRadioButtons,0);
+					for (var i=0; i<arrTEMLRadioButtons.length; i++) {
+						arrTEMLRadioButtons[i].disabled = true;
+					}
+					
+					var tmpRadios = document.getElementsByName("radioAttack");
+					setTEML(tmpRadios, arrAttackTEML[myIndex]);
+					var tmpRadios = document.getElementsByName("radioPerception");
+					setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+					
+					if(myBuild == "Combatant") {
+						var tmpRadios = document.getElementsByName("radioAthletics");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioIntimidation");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioSurvival");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioFort");
+						setTEML(tmpRadios, arrSaveTEML1[myIndex]);
+						var tmpRadios = document.getElementsByName("radioRef");
+						setTEML(tmpRadios, arrSaveTEML2[myIndex]);
+						var tmpRadios = document.getElementsByName("radioWill");
+						setTEML(tmpRadios, arrSaveTEML3[myIndex]);
+						var tmpRadios = document.getElementsByName("radioAC");
+						setTEML(tmpRadios, arrACTEML[myIndex]+2); // combatant has strong proficiency in AC
+						
+						document.getElementById("reactions").innerHTML = "<span class=\"line-heavy\">Attack of Opportunity <img class=\"action-icon\" src=\"data:image/png;base64," + reactionIcon + "\" alt=\"(reaction)\"/></span>";
+					}
+					else if(myBuild == "Expert") {
+						var tmpRadios = document.getElementsByName("radioAcrobatics");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioDeception");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioDiplomacy");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioSociety");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioStealth");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioFort");
+						setTEML(tmpRadios, arrSaveTEML3[myIndex]);
+						var tmpRadios = document.getElementsByName("radioRef");
+						setTEML(tmpRadios, arrSaveTEML1[myIndex]);
+						var tmpRadios = document.getElementsByName("radioWill");
+						setTEML(tmpRadios, arrSaveTEML2[myIndex]);
+						var tmpRadios = document.getElementsByName("radioAC");
+						setTEML(tmpRadios, arrACTEML[myIndex]-2); // expert has weak proficiency in AC
+						
+						document.getElementById("reactions").innerHTML = "";
+					}
+					else if(myBuild == "Spellcaster") {
+						var tmpRadios = document.getElementsByName("radioArcana");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioLore");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioReligion");
+						setTEML(tmpRadios, arrSkillsTEML[myIndex]);
+						var tmpRadios = document.getElementsByName("radioFort");
+						setTEML(tmpRadios, arrSaveTEML3[myIndex]);
+						var tmpRadios = document.getElementsByName("radioRef");
+						setTEML(tmpRadios, arrSaveTEML3[myIndex]); // not an error, spellcaster has two bad saves
+						var tmpRadios = document.getElementsByName("radioWill");
+						setTEML(tmpRadios, arrSaveTEML1[myIndex]);
+						var tmpRadios = document.getElementsByName("radioAC");
+						setTEML(tmpRadios, arrACTEML[myIndex]-2); // spellcaster has weak proficiency in AC
+						
+						document.getElementById("reactions").innerHTML = "";
+					}
+				}
+			}
+
+			function recalcName() {
+				myName = document.getElementById("monsterName").value;
+				document.getElementById("name").innerHTML = myName;
+				recalcSpecial();
+			}
+
+			function recalcLevel() {
+				myLevel = parseInt(document.getElementById("monsterLevel").value);
+				document.getElementById("level").innerHTML = myLevel;
+				
+				myIndex = myLevel + 1;
+				myProficiency = Math.max(0, myLevel);
+				recalcBuild();
+				recalcAbilities();
+				recalcPerception();
+				recalcSkills();
+				recalcAC();
+				recalcSaves();
+				recalcHP();
+				recalcAttack();
+				recalcSpecial();
+			}
+
+			function recalcAbilities() {
+				if(myBuild != "None") {
+					if(myBuild == "Combatant") {
+						// str > con > dex > wis > cha > int
+						myStr = arrAbilityScore1[myIndex];
+						myCon = arrAbilityScore2[myIndex];
+						myDex = arrAbilityScore3[myIndex];
+						myWis = arrAbilityScore4[myIndex];
+						myCha = arrAbilityScore5[myIndex];
+						myInt = arrAbilityScore6[myIndex];
+					}
+					else if(myBuild == "Expert") {
+						// dex > cha > int > con > str > wis
+						myDex = arrAbilityScore1[myIndex];
+						myCha = arrAbilityScore2[myIndex];
+						myInt = arrAbilityScore3[myIndex];
+						myCon = arrAbilityScore4[myIndex];
+						myStr = arrAbilityScore5[myIndex];
+						myWis = arrAbilityScore6[myIndex];
+					}
+					else if(myBuild == "Spellcaster") {
+						// wis > dex > int > con > str > cha
+						myWis = arrAbilityScore1[myIndex];
+						myDex = arrAbilityScore2[myIndex];
+						myInt = arrAbilityScore3[myIndex];
+						myCon = arrAbilityScore4[myIndex];
+						myStr = arrAbilityScore5[myIndex];
+						myCha = arrAbilityScore6[myIndex];
+					}
+				}
+				document.getElementById("str-modifier").innerHTML = (myStr < 0 ? "" : "+") + myStr;
+				document.getElementById("dex-modifier").innerHTML = (myDex < 0 ? "" : "+") + myDex;
+				document.getElementById("con-modifier").innerHTML = (myCon < 0 ? "" : "+") + myCon;
+				document.getElementById("int-modifier").innerHTML = (myInt < 0 ? "" : "+") + myInt;
+				document.getElementById("wis-modifier").innerHTML = (myWis < 0 ? "" : "+") + myWis;
+				document.getElementById("cha-modifier").innerHTML = (myCha < 0 ? "" : "+") + myCha;
+			}
+
+			function recalcAC() {
+				var tmpRadios = document.getElementsByName("radioAC");
+				myACTEML = getTEML(tmpRadios);
+				
+				//myACItemBonus = parseInt(document.getElementById("monsterACItemBonus").value);
+				
+				var myAC = 10 + (myACTEML==0 ? 0 : 1) * (myACTEML + myProficiency) + myACItemBonus + myDex;
+				document.getElementById("ac").innerHTML = myAC;
+			}
+
+			function recalcSaves() {
+				var tmpRadios = document.getElementsByName("radioFort");
+				myFortTEML = getTEML(tmpRadios);
+				var myFort = (myFortTEML==0 ? 0 : 1) * (myFortTEML + myProficiency) + myCon;
+				myFort = (myFort < 0 ? "" : "+") + myFort;
+				document.getElementById("fort").innerHTML = myFort;
+				
+				var tmpRadios = document.getElementsByName("radioRef");
+				myRefTEML = getTEML(tmpRadios);
+				var myRef = (myRefTEML==0 ? 0 : 1) * (myRefTEML + myProficiency) + myDex;
+				myRef = (myRef < 0 ? "" : "+") + myRef;
+				document.getElementById("ref").innerHTML = myRef;
+				
+				var tmpRadios = document.getElementsByName("radioWill");
+				myWillTEML = getTEML(tmpRadios);
+				var myWill = (myWillTEML==0 ? 0 : 1) * (myWillTEML + myProficiency) + myWis;
+				myWill = (myWill < 0 ? "" : "+") + myWill;
+				document.getElementById("will").innerHTML = myWill;
+			}
+
+			function recalcHP() {
+				myHP = arrHP[myIndex];
+				document.getElementById("hp").innerHTML = myHP;
+				
+				var myImmunities = document.getElementById("monsterImmunities").value;
+				var myResistances = document.getElementById("monsterResistances").value;
+				
+				var strImmunitiesAndResistances = "";
+				if(myImmunities != "") {
+					strImmunitiesAndResistances += "; <span class=\"line-heavy\">Immunities </span>" + myImmunities;
+				}
+				if(myResistances != "") {
+					strImmunitiesAndResistances += "; <span class=\"line-heavy\">Resistances </span>" + myResistances;
+				}
+				
+				document.getElementById("immunities").innerHTML = strImmunitiesAndResistances;
+			}
+
+			function recalcSpeed() {
+				mySpeed = parseInt(document.getElementById("monsterSpeed").value);
+				document.getElementById("speed").innerHTML = mySpeed + " feet";
+				
+				var myOtherSpeeds = document.getElementById("monsterOtherSpeeds").value;
+				
+				var strOtherSpeeds = "";
+				if(myOtherSpeeds != "") {
+					strOtherSpeeds += "; " + myOtherSpeeds;
+				}
+				
+				document.getElementById("otherSpeeds").innerHTML = strOtherSpeeds;
+			}
+
+			function recalcAttack() {
+				var tmpRadios = document.getElementsByName("radioAttack");
+				myAttackTEML = getTEML(tmpRadios);
+				
+				var myAttackName = document.getElementById("monsterAttackName").value;
+				var myAttack = (myAttackTEML==0 ? 0 : 1) * (myAttackTEML + myProficiency) + (myBuild == "Combatant" ? myStr : (myBuild == "Expert" ? myDex : myDex));
+				var strAttack = "<img class=\"action-icon\" src=\"data:image/png;base64," + actionIcon + "\" alt=\"&gt;\"/>";
+				strAttack += " " + myAttackName + " " + (myAttack < 0 ? "" : "+") + myAttack;
+				document.getElementById("attack").innerHTML = strAttack;
+				
+				var myDamageType = document.getElementById("monsterDamageType").value;
+				myDamage = arrDamage[myIndex];
+				var strDamageDiceCount = arrDamageDice[myIndex];
+				var strDamageDiceSides = "";
+				if(myBuild == "Combatant") {
+					strDamageDiceSides = "d10";
+				}
+				else if(myBuild == "Expert") {
+					strDamageDiceSides = "d8";
+				}
+				else {
+					strDamageDiceSides = "d6";
+				}
+				var strDamageBonus = parseInt(myDamage-(strDamageDiceCount*4.5));
+				if(strDamageBonus > 0) {
+					strDamageBonus = "+" + strDamageBonus;
+				}
+				else if(strDamageBonus == 0) {
+					strDamageBonus = "";
+				}
+				document.getElementById("damage").innerHTML =  strDamageDiceCount + strDamageDiceSides + strDamageBonus + " " + myDamageType;
+			}
+
+			function recalcSpecial() {
+				myDamage = arrDamage[myIndex];
+				var myDamageDice = parseInt(myDamage/3.5);
+				
+				if(myBuild == "Combatant") {
+					var myDCTEML = arrDCTEML[myIndex];
+					var mySpecialDC = 10 + (myDCTEML==0 ? 0 : 1) * (myDCTEML + myProficiency) + myWis;
+					var strSpecial = "<span class=\"line-heavy\">Breath Weapon</span>";
+					strSpecial += " <img class=\"action-icon\" src=\"data:image/png;base64," + action2Icon + "\" alt=\"&gt;&gt;\"/>";
+					strSpecial += " (fire) The " + myName.toLowerCase() + " breathes flames in a 15-foot cone that deals " + myDamageDice + "d6 fire damage to each creature within the area (DC " + mySpecialDC + " basic Reflex save). The " + myName.toLowerCase() + " can&apos;t use Breath Weapon again for 1d4 rounds.</span>";
+					document.getElementById("special").innerHTML = strSpecial;
+				}
+				else if(myBuild == "Expert") {
+					var myDCTEML = arrDCTEML[myIndex];
+					var mySpecialDC = 10 + (myDCTEML==0 ? 0 : 1) * (myDCTEML + myProficiency) + myCha;
+					var strSpecial = "<span class=\"line-heavy\">Breath Weapon</span>";
+					strSpecial += " <img class=\"action-icon\" src=\"data:image/png;base64," + action2Icon + "\" alt=\"&gt;&gt;\"/>";
+					strSpecial += " (fire) The " + myName.toLowerCase() + " breathes flames in a 15-foot cone that deals " + myDamageDice + "d6 fire damage to each creature within the area (DC " + mySpecialDC + " basic Reflex save). The " + myName.toLowerCase() + " can&apos;t use Breath Weapon again for 1d4 rounds.</span>";
+					document.getElementById("special").innerHTML = strSpecial;
+				}
+				else {
+					var mySpellDCTEML = arrSpellDCTEML[myIndex];
+					var mySpellDC = 10 + (mySpellDCTEML==0 ? 0 : 1) * (mySpellDCTEML + myProficiency) + myWis;
+					var mySpellAttack = (myAttackTEML==0 ? 0 : 1) * (myAttackTEML + myProficiency) + myWis;
+					mySpellAttack = (mySpellAttack < 0 ? "" : "+") + mySpellAttack;
+					strSpells =  "<span class=\"line-heavy\">Prepared Spells</span> DC " + mySpellDC + ", attack " + mySpellAttack;
+					
+					var myHighestSpellLevel = Math.min(10,parseInt((myProficiency+1)/2));
+					for (var i=myHighestSpellLevel; i>0; i--) {
+						strSpells += "; <span class=\"line-heavy\">";
+						strSpells += i;
+						switch(i) {
+							case 10:
+							case 9:
+							case 8:
+							case 7:
+							case 6:
+							case 5:
+							case 4:
+								strSpells += "th";
+								break;
+							case 3:
+								strSpells += "rd";
+								break;
+							case 2:
+								strSpells += "nd";
+								break;
+							case 1:
+								strSpells += "st";
+								break;
+						}
+						strSpells += "</span> ";
+						if(i==10) {
+							strSpells += "(x1)";
+						}
+						else {
+							strSpells += ((i*2)-1==myProficiency ? "(x2)" : "(x3)");
+						}
+					}
+					strSpells += "; <span class=\"line-heavy\">Cantrips (";
+					strSpells += myHighestSpellLevel;
+					switch(myHighestSpellLevel) {
+						case 10:
+						case 9:
+						case 8:
+						case 7:
+						case 6:
+						case 5:
+						case 4:
+							strSpells += "th";
+							break;
+						case 3:
+							strSpells += "rd";
+							break;
+						case 2:
+							strSpells += "nd";
+							break;
+						case 1:
+							strSpells += "st";
+							break;
+					}
+					strSpells += ")</span> (x5)";
+					
+					document.getElementById("special").innerHTML =  strSpells;
+				}
+			}
+
+			function recalcSize() {
+				mySize = document.getElementById("monsterSize").value;
+				recalcTags();
+			}
+
+			function recalcTags() {
+				myTags = document.getElementById("monsterTags").value.split(" ");
+				var strTags = "";
+				
+				// rarity
+				for (var i=0; i<myTags.length; i++) {
+					switch(myTags[i].toLowerCase()) {
+						case "uncommon":
+							strTags += "<div class=\"tag-rarity-uncommon\">" + myTags[i].toLowerCase() + " </div>\r\n";
+							break;
+						case "rare":
+							strTags += "<div class=\"tag-rarity-rare\">" + myTags[i].toLowerCase() + " </div>\r\n";
+							break;
+						case "unique":
+							strTags += "<div class=\"tag-rarity-unique\">" + myTags[i].toLowerCase() + " </div>\r\n";
+							break;
+					}
+				}
+				
+				// alignment
+				for (var i=0; i<myTags.length; i++) {
+					switch(myTags[i].toLowerCase()) {
+						case "lg":
+						case "ln":
+						case "le":
+						case "ng":
+						case "n":
+						case "ne":
+						case "cg":
+						case "cn":
+						case "ce":
+							strTags += "<div class=\"tag-alignment\">" + myTags[i].toLowerCase() + " </div>\r\n";
+							break;
+					}
+				}
+				
+				// size
+				for (var i=0; i<myTags.length; i++) {
+					switch(myTags[i].toLowerCase()) {
+						case "tiny":
+						case "small":
+						case "medium":
+						case "large":
+						case "huge":
+						case "gargantuan":
+							strTags += "<div class=\"tag-size\">" + myTags[i].toLowerCase() + " </div>\r\n";
+							break;
+					}
+				}
+				
+				// other tags
+				for (var i=0; i<myTags.length; i++) {
+					switch(myTags[i].toLowerCase()) {
+						case "":
+						case "common":
+						case "uncommon":
+						case "rare":
+						case "unique":
+						case "lg":
+						case "ln":
+						case "le":
+						case "ng":
+						case "n":
+						case "ne":
+						case "cg":
+						case "cn":
+						case "ce":
+						case "tiny":
+						case "small":
+						case "medium":
+						case "large":
+						case "huge":
+						case "gargantuan":
+							break;
+						default:
+							strTags += "<div class=\"tag-other\">" + myTags[i] + " </div>";
+					}
+				}
+				
+				document.getElementById("tags").innerHTML = strTags;
+			}
+
+			function recalcPerception() {
+				var tmpRadios = document.getElementsByName("radioPerception");
+				myPerceptionTEML = getTEML(tmpRadios);
+				var myPerception = (myPerceptionTEML==0 ? 0 : 1) * (myPerceptionTEML + myProficiency) + myWis;
+				myPerception = (myPerception < 0 ? "" : "+") + myPerception;
+				document.getElementById("perception-modifier").innerHTML = myPerception;
+			}
+
+			function recalcSenses() {
+				var myOtherSenses = document.getElementById("monsterOtherSenses").value;
+				
+				var strSenses = "";
+				if(myOtherSenses != "") {
+					strSenses = "; " + myOtherSenses;
+				}
+				
+				document.getElementById("senses").innerHTML = strSenses;
+			}
+
+			function recalcSkills() {
+				// Acrobatics
+				var tmpRadios = document.getElementsByName("radioAcrobatics");
+				myAcrobaticsTEML = getTEML(tmpRadios);
+				var myAcrobatics = (myAcrobaticsTEML==0 ? 0 : 1) * (myAcrobaticsTEML + myProficiency) + myDex;
+				myAcrobatics = (myAcrobatics < 0 ? "" : "+") + myAcrobatics;
+				
+				// Arcana
+				var tmpRadios = document.getElementsByName("radioArcana");
+				myArcanaTEML = getTEML(tmpRadios);
+				var myArcana = (myArcanaTEML==0 ? 0 : 1) * (myArcanaTEML + myProficiency) + myInt;
+				myArcana = (myArcana < 0 ? "" : "+") + myArcana;
+				
+				// Athletics
+				var tmpRadios = document.getElementsByName("radioAthletics");
+				myAthleticsTEML = getTEML(tmpRadios);
+				var myAthletics = (myAthleticsTEML==0 ? 0 : 1) * (myAthleticsTEML + myProficiency) + myStr;
+				myAthletics = (myAthletics < 0 ? "" : "+") + myAthletics;
+				
+				// Crafting
+				var tmpRadios = document.getElementsByName("radioCrafting");
+				myCraftingTEML = getTEML(tmpRadios);
+				var myCrafting = (myCraftingTEML==0 ? 0 : 1) * (myCraftingTEML + myProficiency) + myInt;
+				myCrafting = (myCrafting < 0 ? "" : "+") + myCrafting;
+				
+				// Deception
+				var tmpRadios = document.getElementsByName("radioDeception");
+				myDeceptionTEML = getTEML(tmpRadios);
+				var myDeception = (myDeceptionTEML==0 ? 0 : 1) * (myDeceptionTEML + myProficiency) + myCha;
+				myDeception = (myDeception < 0 ? "" : "+") + myDeception;
+				
+				// Diplomacy
+				var tmpRadios = document.getElementsByName("radioDiplomacy");
+				myDiplomacyTEML = getTEML(tmpRadios);
+				var myDiplomacy = (myDiplomacyTEML==0 ? 0 : 1) * (myDiplomacyTEML + myProficiency) + myCha;
+				myDiplomacy = (myDiplomacy < 0 ? "" : "+") + myDiplomacy;
+				
+				// Intimidation
+				var tmpRadios = document.getElementsByName("radioIntimidation");
+				myIntimidationTEML = getTEML(tmpRadios);
+				var myIntimidation = (myIntimidationTEML==0 ? 0 : 1) * (myIntimidationTEML + myProficiency) + myCha;
+				myIntimidation = (myIntimidation < 0 ? "" : "+") + myIntimidation;
+				
+				// Lore
+				var tmpRadios = document.getElementsByName("radioLore");
+				myLoreTEML = getTEML(tmpRadios);
+				var myLore = (myLoreTEML==0 ? 0 : 1) * (myLoreTEML + myProficiency) + myInt;
+				myLore = (myLore < 0 ? "" : "+") + myLore;
+				
+				// Medicine
+				var tmpRadios = document.getElementsByName("radioMedicine");
+				myMedicineTEML = getTEML(tmpRadios);
+				var myMedicine = (myMedicineTEML==0 ? 0 : 1) * (myMedicineTEML + myProficiency) + myWis;
+				myMedicine = (myMedicine < 0 ? "" : "+") + myMedicine;
+				
+				// Nature
+				var tmpRadios = document.getElementsByName("radioNature");
+				myNatureTEML = getTEML(tmpRadios);
+				var myNature = (myNatureTEML==0 ? 0 : 1) * (myNatureTEML + myProficiency) + myWis;
+				myNature = (myNature < 0 ? "" : "+") + myNature;
+				
+				// Occultism
+				var tmpRadios = document.getElementsByName("radioOccultism");
+				myOccultismTEML = getTEML(tmpRadios);
+				var myOccultism = (myOccultismTEML==0 ? 0 : 1) * (myOccultismTEML + myProficiency) + myInt;
+				myOccultism = (myOccultism < 0 ? "" : "+") + myOccultism;
+				
+				// Performance
+				var tmpRadios = document.getElementsByName("radioPerformance");
+				myPerformanceTEML = getTEML(tmpRadios);
+				var myPerformance = (myPerformanceTEML==0 ? 0 : 1) * (myPerformanceTEML + myProficiency) + myCha;
+				myPerformance = (myPerformance < 0 ? "" : "+") + myPerformance;
+				
+				// Religion
+				var tmpRadios = document.getElementsByName("radioReligion");
+				myReligionTEML = getTEML(tmpRadios);
+				var myReligion = (myReligionTEML==0 ? 0 : 1) * (myReligionTEML + myProficiency) + myWis;
+				myReligion = (myReligion < 0 ? "" : "+") + myReligion;
+				
+				// Society
+				var tmpRadios = document.getElementsByName("radioSociety");
+				mySocietyTEML = getTEML(tmpRadios);
+				var mySociety = (mySocietyTEML==0 ? 0 : 1) * (mySocietyTEML + myProficiency) + myInt;
+				mySociety = (mySociety < 0 ? "" : "+") + mySociety;
+				
+				// Stealth
+				var tmpRadios = document.getElementsByName("radioStealth");
+				myStealthTEML = getTEML(tmpRadios);
+				var myStealth = (myStealthTEML==0 ? 0 : 1) * (myStealthTEML + myProficiency) + myDex;
+				myStealth = (myStealth < 0 ? "" : "+") + myStealth;
+				
+				// Survival
+				var tmpRadios = document.getElementsByName("radioSurvival");
+				mySurvivalTEML = getTEML(tmpRadios);
+				var mySurvival = (mySurvivalTEML==0 ? 0 : 1) * (mySurvivalTEML + myProficiency) + myWis;
+				mySurvival = (mySurvival < 0 ? "" : "+") + mySurvival;
+				
+				// Thievery
+				var tmpRadios = document.getElementsByName("radioThievery");
+				myThieveryTEML = getTEML(tmpRadios);
+				var myThievery = (myThieveryTEML==0 ? 0 : 1) * (myThieveryTEML + myProficiency) + myDex;
+				myThievery = (myThievery < 0 ? "" : "+") + myThievery;
+				
+				var strSkills = "";
+				
+				if(myAcrobaticsTEML >0) {strSkills += "Acrobatics " + myAcrobatics + ", ";}
+				if(myArcanaTEML >0) {strSkills += "Arcana " + myArcana + ", ";}
+				if(myAthleticsTEML >0) {strSkills += "Athletics " + myAthletics + ", ";}
+				if(myCraftingTEML >0) {strSkills += "Crafting " + myCrafting + ", ";}
+				if(myDeceptionTEML >0) {strSkills += "Deception " + myDeception + ", ";}
+				if(myDiplomacyTEML >0) {strSkills += "Diplomacy " + myDiplomacy + ", ";}
+				if(myIntimidationTEML >0) {strSkills += "Intimidation " + myIntimidation + ", ";}
+				if(myLoreTEML >0) {strSkills += "Lore " + myLore + ", ";}
+				if(myMedicineTEML >0) {strSkills += "Medicine " + myMedicine + ", ";}
+				if(myNatureTEML >0) {strSkills += "Nature " + myNature + ", ";}
+				if(myOccultismTEML >0) {strSkills += "Occultism " + myOccultism + ", ";}
+				if(myPerformanceTEML >0) {strSkills += "Performance " + myPerformance + ", ";}
+				if(myReligionTEML >0) {strSkills += "Religion " + myReligion + ", ";}
+				if(mySocietyTEML >0) {strSkills += "Society " + mySociety + ", ";}
+				if(myStealthTEML >0) {strSkills += "Stealth " + myStealth + ", ";}
+				if(mySurvivalTEML >0) {strSkills += "Survival " + mySurvival + ", ";}
+				if(myThieveryTEML >0) {strSkills += "Thievery " + myThievery + ", ";}
+				
+				strSkills = (strSkills.length == 0 ? "" : strSkills.substring(0,strSkills.length-2));
+				
+				document.getElementById("skills").innerHTML = strSkills;
+			}
+		</script>
+	</head>
+	<body onload="recalc()">
+		<div id="config">
+			<div class="configTableLabel">Build: </div>
+			<div class="configTableCell">
+				<!-- <label class="radioContainer"><input class="radioText" type="radio" name="radioAutoBuild" onclick="recalcBuild()" value="None"><span class="checkmark">No auto-build</span></label><br/>-->
+				<label class="radioContainer"><input class="radioText" type="radio" name="radioBuild" onclick="recalc()" value="Combatant" checked="checked"><span class="checkmark">Combatant</span></label><br/>
+				<label class="radioContainer"><input class="radioText" type="radio" name="radioBuild" onclick="recalc()" value="Expert"><span class="checkmark">Expert</span></label><br/>
+				<label class="radioContainer"><input class="radioText" type="radio" name="radioBuild" onclick="recalc()" value="Spellcaster"><span class="checkmark">Spellcaster</span></label>
+			</div>
+			<div class="configTableLabel">Name: </div>
+			<div class="configTableCell"><input type="text" class="configText" id="monsterName" onchange="recalcName()" value="Dragon Cultist" /></div>
+			<div class="configTableLabel">Level: </div>
+			<div class="configTableCell"><input type="number" class="configText" id="monsterLevel" min="-1" max="25" value="1" onchange="recalcLevel()" /></div>
+			<div class="configTableLabel">Tags: </div>
+			<div class="configTableCell"><input type="text" class="configText" id="monsterTags" onchange="recalcTags()" value="common NE medium humanoid" /></div>
+			<div class="configTableHeader">Perception: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioPerception" onclick="recalcPerception()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioPerception" onclick="recalcPerception()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioPerception" onclick="recalcPerception()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioPerception" onclick="recalcPerception()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioPerception" onclick="recalcPerception()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableLabel">Senses: </div>
+			<div class="configTableCell"><input type="text" class="configText" id="monsterOtherSenses" onchange="recalcSenses()" value="low-light vision" /></div>
+			<div class="configTableHeader">Acrobatics: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAcrobatics" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAcrobatics" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAcrobatics" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAcrobatics" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAcrobatics" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Arcana: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioArcana" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioArcana" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioArcana" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioArcana" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioArcana" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Athletics: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAthletics" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAthletics" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAthletics" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAthletics" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAthletics" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Crafting: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioCrafting" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioCrafting" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioCrafting" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioCrafting" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioCrafting" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Deception: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioDeception" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioDeception" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioDeception" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioDeception" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioDeception" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Diplomacy: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioDiplomacy" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioDiplomacy" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioDiplomacy" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioDiplomacy" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioDiplomacy" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Intimidation: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioIntimidation" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioIntimidation" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioIntimidation" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioIntimidation" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioIntimidation" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Lore: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioLore" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioLore" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioLore" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioLore" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioLore" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Medicine: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioMedicine" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioMedicine" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioMedicine" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioMedicine" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioMedicine" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Nature: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioNature" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioNature" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioNature" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioNature" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioNature" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Occultism: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioOccultism" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioOccultism" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioOccultism" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioOccultism" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioOccultism" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Performance: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioPerformance" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioPerformance" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioPerformance" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioPerformance" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioPerformance" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Religion: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioReligion" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioReligion" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioReligion" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioReligion" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioReligion" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Society: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioSociety" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioSociety" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioSociety" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioSociety" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioSociety" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Stealth: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioStealth" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioStealth" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioStealth" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioStealth" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioStealth" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Survival: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioSurvival" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioSurvival" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioSurvival" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioSurvival" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioSurvival" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Thievery: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioThievery" onclick="recalcSkills()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioThievery" onclick="recalcSkills()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioThievery" onclick="recalcSkills()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioThievery" onclick="recalcSkills()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioThievery" onclick="recalcSkills()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">AC: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAC" onclick="recalcAC()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAC" onclick="recalcAC()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAC" onclick="recalcAC()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAC" onclick="recalcAC()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAC" onclick="recalcAC()" value="8">L<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAC" onclick="recalcAC()" value="10">L+<span class="checkmark"></span></label>
+			</div>
+			<!-- <div class="configTableLabel">AC item bonus: </div>
+			<div class="configTableCell"><input type="number" class="configText" id="monsterACItemBonus" min="-100" max="100" value="0" onchange="recalcAC()" /></div> -->
+			<div class="configTableHeader">Fort: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioFort" onclick="recalcSaves()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioFort" onclick="recalcSaves()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioFort" onclick="recalcSaves()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioFort" onclick="recalcSaves()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioFort" onclick="recalcSaves()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Ref: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioRef" onclick="recalcSaves()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioRef" onclick="recalcSaves()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioRef" onclick="recalcSaves()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioRef" onclick="recalcSaves()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioRef" onclick="recalcSaves()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableHeader">Will: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioWill" onclick="recalcSaves()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioWill" onclick="recalcSaves()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioWill" onclick="recalcSaves()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioWill" onclick="recalcSaves()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioWill" onclick="recalcSaves()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableLabel">Speed: </div>
+			<div class="configTableCell"><input type="number" class="configText" id="monsterSpeed" min="0" max="1000" value="20" onchange="recalcSpeed()" /></div>
+			<div class="configTableLabel">Other speeds: </div>
+			<div class="configTableCell"><input type="text" class="configText" id="monsterOtherSpeeds" onchange="recalcSpeed()" value="" /></div>
+			<div class="configTableLabel">Immunities: </div>
+			<div class="configTableCell"><input type="text" class="configText" id="monsterImmunities" onchange="recalcHP()" value="" /></div>
+			<div class="configTableLabel">Resistances: </div>
+			<div class="configTableCell"><input type="text" class="configText" id="monsterResistances" onchange="recalcHP()" value="" /></div>
+			<div class="configTableHeader">Attack: </div>
+			<div class="configTableTEML">
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAttack" onclick="recalcAttack()" value="0" checked="checked">&ndash;<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAttack" onclick="recalcAttack()" value="2">T<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAttack" onclick="recalcAttack()" value="4">E<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAttack" onclick="recalcAttack()" value="6">M<span class="checkmark"></span></label>
+				<label class="radioContainer"><input class="radioTEML" type="radio" name="radioAttack" onclick="recalcAttack()" value="8">L<span class="checkmark"></span></label>
+			</div>
+			<div class="configTableLabel">Attack name: </div>
+			<div class="configTableCell"><input type="text" class="configText" id="monsterAttackName" onchange="recalcAttack()" value="claws" /></div>
+			<div class="configTableLabel">Damage type: </div>
+			<div class="configTableCell"><input type="text" class="configText" id="monsterDamageType" onchange="recalcAttack()" value="slashing" /></div>
+		</div> <!-- config -->
+		<div id="statblock">
+			<div id="title">
+				<span id="name"></span>
+				<span id="creature"> CREATURE <span id="level"></span></span>
+			</div>
+			<div id="statistics" class="info-block">
+				<div id="tags">
+				</div>
+				<div id="info-other">
+					<div class="info-line">
+						<span class="line-heavy">Perception </span><span id="perception-modifier"></span><span id="senses"></span>
+					</div>
+					
+					<div class="info-line">
+					<span class="line-heavy">Skills </span><span id="skills"></span>
+					</div>
+					
+					<div class="info-line">
+						<span class="line-heavy">Str </span><span id="str-modifier"></span>,
+						<span class="line-heavy">Dex </span><span id="dex-modifier"></span>,
+						<span class="line-heavy">Con </span><span id="con-modifier"></span>,
+						<span class="line-heavy">Int </span><span id="int-modifier"></span>,
+						<span class="line-heavy">Wis </span><span id="wis-modifier"></span>,
+						<span class="line-heavy">Cha </span><span id="cha-modifier"></span>
+					</div>
+				</div>
+			</div> <!-- statistics -->
+			<div id="defense" class="info-block">
+				<div class="info-line">
+					<span class="line-heavy">AC </span><span id="ac"></span>;
+					<span class="line-heavy">Fort </span><span id="fort"></span>,
+					<span class="line-heavy">Ref </span><span id="ref"></span>,
+					<span class="line-heavy">Will </span><span id="will"></span>
+				</div>
+				
+				<div class="info-line">
+					<span class="line-heavy">HP </span><span id="hp"></span><span id="immunities"></span>
+				</div>
+				
+				<div class="info-line">
+					<span id="reactions"></span>
+				</div>
+			</div> <!-- defense -->
+			<div id="offense" class="info-block">
+				<div class="info-line">
+					<span class="line-heavy">Speed </span><span id="speed"></span><span id="otherSpeeds"></span>
+				</div>
+				
+				<div class="info-line">
+					<span class="line-heavy">Melee</span> <span id="attack"></span>,
+					<span class="line-heavy">Damage</span> <span id="damage"></span>
+				</div>
+				<div class="info-line">
+					<span id="special"></span>
+				</div>
+			</div> <!-- offense -->
+		</div> <!-- main -->
+	</body>
+</html>
+
+
+
+
+
+
+
+
