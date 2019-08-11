@@ -552,8 +552,8 @@
 						}
 					}
 					strSpells += "; <span class=\"line-heavy\">Cantrips (";
-					strSpells += myHighestSpellLevel;
-					switch(myHighestSpellLevel) {
+					strSpells += Math.max(1,myHighestSpellLevel);
+					switch(Math.max(1,myHighestSpellLevel)) {
 						case 10:
 						case 9:
 						case 8:
