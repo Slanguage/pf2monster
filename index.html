@@ -311,7 +311,7 @@
 						var tmpRadios = document.getElementsByName("radioWill");
 						setTEML(tmpRadios, arrSaveTEML2[myIndex]);
 						var tmpRadios = document.getElementsByName("radioAC");
-						setTEML(tmpRadios, arrACTEML[myIndex]-2); // expert has weak proficiency in AC
+						setTEML(tmpRadios, arrACTEML[myIndex]+(myLevel>3 ? -2 : 0)); //expert skips first armor proficiency increase
 						
 						document.getElementById("reactions").innerHTML = "";
 					}
